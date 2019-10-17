@@ -33,7 +33,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
-import DatabaseObjects.*;
+import DatabaseObjects.Column;
+import DatabaseObjects.Table;
+import Dto.DBConfigDto;
 import Enums.DbType;
 
 public class DbConn implements Cloneable{
@@ -75,6 +77,30 @@ public class DbConn implements Cloneable{
         return this.url;
     }
 
+    public DbConn(DBConfigDto dto) 
+        throws SQLException, PropertyVetoException, ClassNotFoundException
+    {    
+        this.dbType = dto.getDbtype();
+        this.databaseName = dto.getDatabase_name();
+        this.username = dto.getUser();
+        this.password = dto.getPassword();
+        this.host= dto.getHost();
+        this.port = dto.getPort().toString();
+        String url = MessageFormat.format(dbType.url(), host, port, databaseName);
+        // this.logger = jLogger.logger;
+ 
+        this.url = url;
+        Properties props = new Properties();
+        props.setProperty("user", this.username);
+        props.setProperty("password", this.password);
+        
+        Class.forName(this.dbType.driver());
+        this.conn = DriverManager.getConnection(url, props);
+        // MemoryListener.BindListeners(); // disabled for now
+        //System.out.println("Connect to Database: " + this.url);
+        // System.out.println("DB Connection Successful: " + dbtype);
+    }
+
     public DbConn(DbType dbType, String userName, String password, String host, String port, String databaseName) 
     throws SQLException, PropertyVetoException, ClassNotFoundException {
 
@@ -98,6 +124,7 @@ public class DbConn implements Cloneable{
         //System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
+
     public void reConnect() throws ClassNotFoundException, SQLException {
         
         Properties props = new Properties();

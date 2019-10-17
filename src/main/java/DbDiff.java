@@ -1,9 +1,16 @@
+import java.beans.PropertyVetoException;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,6 +24,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import Dto.DBConfigDto;
+import Objects.DbConn;
+import Objects.Task;
 import Utils.YamlParser;
 
 public class DbDiff {
@@ -29,6 +38,7 @@ public class DbDiff {
         tasks.setRequired(true);
 
         cliOptions.addOption(connections);
+        cliOptions.addOption(tasks);
 
         if (args.length == 0) {
             HelpFormatter formatter = new HelpFormatter();
@@ -42,21 +52,48 @@ public class DbDiff {
         return cmd;
     }
 
-    public static void BuildDtos(Map<String, Object> cons)
-            throws JsonParseException, JsonMappingException, IOException {
-        Map<String, DBConfigDto> dtos = new HashMap<String, DBConfigDto>();
-        //mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+    public static Map<String, DbConn> BuildConnections(Map<String, Object> cons) throws JsonParseException,
+            JsonMappingException, IOException, ClassNotFoundException, SQLException, PropertyVetoException {
+        Map<String, DbConn> dbConfigs = new HashMap<String, DbConn>();
+        JsonBuilder builder = new JsonBuilder();
+        ObjectMapper mapper =new ObjectMapper();
 
         for(String key : cons.keySet()){
-            JsonBuilder builder = new JsonBuilder();
-            ObjectMapper mapper =new ObjectMapper();
-
             String jsonString = builder.toJsonString(cons.get(key));
-            DBConfigDto obj = mapper.readValue(jsonString,  new TypeReference<DBConfigDto>(){});
+            DBConfigDto dto = mapper.readValue(jsonString,  new TypeReference<DBConfigDto>(){});
+            DbConn connectionObject = new DbConn(dto);
             
-            dtos.put(key, obj);
+            dbConfigs.put(key, connectionObject);
         }
-        // return dtos;
+        return dbConfigs;
+    }
+
+    public static List<Task> TestOutput(Map<String, Object> ob) 
+        throws JsonParseException, JsonMappingException, IOException {
+   
+        List<Task> tasks = new ArrayList<Task>();
+        JsonBuilder builder = new JsonBuilder();
+        ObjectMapper mapper =new ObjectMapper();
+        mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+
+        for(Entry taskName : ob.entrySet()){
+            LinkedHashMap<String, LinkedHashMap> connections = (LinkedHashMap<String, LinkedHashMap>) taskName.getValue();
+            for(Entry connection : connections.entrySet()) { // connection can have multipe qualifiers
+                LinkedHashMap<String, Object> qualifers = (LinkedHashMap<String, Object>) connection.getValue();
+                for(Entry qualifer : qualifers.entrySet()) {
+                    ArrayList instructions = (ArrayList) qualifer.getValue();
+                    for(Object instruction : instructions){
+                        String params = builder.toJsonString(instruction);
+                        Task task = mapper.readValue(params,  new TypeReference<Task>(){});
+                        task.taskName(taskName.getKey().toString());
+                        task.connection(connection.getKey().toString());
+                        task.qualifier(qualifer.getKey().toString());
+                        tasks.add(task);
+                    }
+                }
+            }
+        }
+        return tasks;
     }
 
     public static void main(String[] args) throws ParseException {
@@ -66,26 +103,15 @@ public class DbDiff {
         try {
             //CommandLine  cmd = parser.parse(options, args);
             YamlParser parse_me = new YamlParser();
-            Map<String, Object> connections = parse_me.ReadYAML(results.getOptionValue("connections"));
-            
-            Map<String, Object> tasks = parse_me.ReadYAML(results.getOptionValue("tasks"));
+            Map<String, Object> connectionsYAML = parse_me.ReadYAML(results.getOptionValue("connections"));
+            Map<String, Object> tasksYAML= parse_me.ReadYAML(results.getOptionValue("tasks"));
 
-            BuildDtos(connections);
+            Map<String, DbConn> connectionsDtos = BuildConnections(connectionsYAML);
+            List<Task> tasks = TestOutput(tasksYAML);
+            //Map<String, TaskDtO> tasksDtos = BuildDtos(tasksYAML);
         } catch(Exception e){
-            e.printStackTrace();
-            System.out.println("broke");
+            System.out.println(e);
         }
-        // /** Should be able to use this example straing from Yaml file for dbtype */
-        // //Enum dbtype = Enum.valueOf(DbConn.DbType.class, "SYBASE");
-        // // This should be all you need to get a jdbc connection
-        // try {
-        //   //  DbConn sybaseConn = new DbConn(DbConn.DbType.SYBASE, "sa", sybasePassword, "dbsybase", "5000", "master");
-        //     //DbConn oracleConn = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1542", "dev");
-        // } catch (Exception e) {
-        //     System.out.println(e);
-
-        // }
-        // ;
-        // main.readyaml();
+        System.exit(1);
     }
 }

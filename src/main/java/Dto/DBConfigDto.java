@@ -1,6 +1,6 @@
 package Dto;
 
-import java.util.Objects;
+import Enums.DbType;
 
 public class DBConfigDto {
 
@@ -13,8 +13,8 @@ public class DBConfigDto {
         this.database_name = database_name;
     }
 
-    public String getDbtype() {
-        return this.dbtype;
+    public DbType getDbtype() {
+        return DbType.getMyEnumIfExists(this.dbtype);
     }
 
     public void setDbtype(String dbtype) {
@@ -43,6 +43,10 @@ public class DBConfigDto {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public String getPassword() {
+        return System.getenv(this.password_envar);
     }
 
     public String getPassword_envar() {
@@ -91,34 +95,6 @@ public class DBConfigDto {
         return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (!(o instanceof DBConfigDto)) {
-            return false;
-        }
-        DBConfigDto dbConnConfig = (DBConfigDto) o;
-        return Objects.equals(dbtype, dbConnConfig.dbtype) && Objects.equals(host, dbConnConfig.host) && Objects.equals(port, dbConnConfig.port) && Objects.equals(user, dbConnConfig.user) && Objects.equals(password_envar, dbConnConfig.password_envar) && Objects.equals(database_name, dbConnConfig.database_name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(dbtype, host, port, user, password_envar, database_name);
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-            " dbtype='" + getDbtype() + "'" +
-            ", host='" + getHost() + "'" +
-            ", port='" + getPort() + "'" +
-            ", user='" + getUser() + "'" +
-            ", password_envar='" + getPassword_envar() + "'" +
-            ", database_name='" + getDatabase_name() + "'" +
-            "}";
-    }
-
     public DBConfigDto() {
     }
  
@@ -129,4 +105,5 @@ public class DBConfigDto {
     private String user;
     private String password_envar;
     private String database_name;
+    private String password;
 }
