@@ -1,0 +1,96 @@
+#-------------------------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
+#-------------------------------------------------------------------------------------------------------------
+
+version: '3.7'
+services:
+  docker-in-docker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace
+      - ~/.gitconfig:/root/.gitconfig
+      - ~/.gitkey:/root/.gitkey
+      - /var/run/docker.sock:/var/run/docker.sock 
+    command: sleep infinity 
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+        reservations:
+          cpus: '1.00'
+    environment:
+      DOCKERIZED: dbpg
+      PGUSER: root
+      PGPASSWORD: docker 
+      PGHOST: dbpg
+      PGPORT: 5432
+      SYBASE_PASSWORD: myPassword
+      ORACLE_SID: dev
+      ORACLE_PDB: ORCLPDB1
+      ORACLE_PWD: Docker12345
+      ORACLE_CHARACTERSET: 'UTF8'
+      JAREXPORT: '/workspace/target/DbTest-jar-with-dependencies.jar'
+      GITHUBRELEASE: '/workspace/.devcontainer/release-manager/pyGithubManager.py'
+      GITHUBKEY: '/root/.gitkey'
+      REPO: 'hung135/dbdifftest'
+      SYBASEPASSWORD: myPassword
+
+  # dbpg:
+  #   image: postgres
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: docker 
+
+  dbsybase:
+    image: nguoianphu/docker-sybase 
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    environment:
+      #Admin user
+      SYBASE_USER: sa
+      SYBASE_PASSWORD: myPassword
+  # dboracle:
+  #   image: oracle/database:12.2.0.1-ee
+  #   restart: unless-stopped
+  #   ports:
+  #     - 1521:1521
+  #     - 5500:5500 
+  #   environment:
+  #     ORACLE_SID: dev
+  #     ORACLE_PDB: ORCLPDB1
+  #     ORACLE_PWD: Docker12345
+  #     ORACLE_CHARACTERSET: 'UTF8'
+
+  
+  postgresql:
+    image: 'bitnami/postgresql:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_USER=bn_sonarqube
+      - POSTGRESQL_DATABASE=bitnami_sonarqube
+      - POSTGRESQL_PASSWORD=bitnami1234
+      - POSTGRES_USER=bn_sonarqube
+      - POSTGRES_PASSWORD=bitnami1234
+    volumes:
+      - ~/.sonarqube/postgresql-persistence/:/bitnami
+
+  sonarqube:
+    image: bitnami/sonarqube:latest
+    depends_on:
+      - postgresql
+    ports:
+      - '9000:9000'
+    environment:
+      - SONARQUBE_DATABASE_USER=bn_sonarqube
+      - SONARQUBE_DATABASE_NAME=bitnami_sonarqube
+      - SONARQUBE_DATABASE_PASSWORD=bitnami1234
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ~/.sonarqube/sonar/:/bitnami

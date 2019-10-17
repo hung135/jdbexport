@@ -1,0 +1,5 @@
+QueryToCSV:
+  sys-dev:
+    create:
+      - writePath: ./reports/{today}-{taskName}-{connection}-{qualifier}.csv
+        sql: SELECT * FROM dbo.mockData1
