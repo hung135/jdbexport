@@ -7,11 +7,14 @@ public class Task {
     private String qualifier;
     private String taskName;
 
-    public Task(){}
-    public Task(String writePath, String sql){
+    public Task() {
+    }
+
+    public Task(String writePath, String sql) {
         this.writePath = writePath;
         this.sql = sql;
     }
+
 
     public String getWritePath() {
         return this.writePath;

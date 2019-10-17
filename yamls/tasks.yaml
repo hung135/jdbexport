@@ -1,7 +1,7 @@
 QueryToCSV:
   sys-dev:
     create:
-      - writePath: "./reports/{today}-{taskName}-{connection}-{qualifier}.csv"
-        sql: "SELECT * FROM dbo.mockData1"
-      - writePath: ./reports/{today}-{taskName}-{connection}-{qualifier}.csv
-        sql: SELECT * FROM dbo.mockData1
+      - writePath: /workspace/output1.csv
+        sql: select * from dbo.monBucketPool
+      - writePath: /workspace/output2.csv
+        sql: select * from dbo.monBucketPool

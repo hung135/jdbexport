@@ -1,5 +1,6 @@
 import java.beans.PropertyVetoException;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,16 +100,26 @@ public class DbDiff {
     public static void main(String[] args) throws ParseException {
         CommandLine results = ParseCLI(args);
 
-        // Build up objects here
         try {
-            //CommandLine  cmd = parser.parse(options, args);
             YamlParser parse_me = new YamlParser();
             Map<String, Object> connectionsYAML = parse_me.ReadYAML(results.getOptionValue("connections"));
             Map<String, Object> tasksYAML= parse_me.ReadYAML(results.getOptionValue("tasks"));
 
-            Map<String, DbConn> connectionsDtos = BuildConnections(connectionsYAML);
+            Map<String, DbConn> connections = BuildConnections(connectionsYAML);
             List<Task> tasks = TestOutput(tasksYAML);
-            //Map<String, TaskDtO> tasksDtos = BuildDtos(tasksYAML);
+
+            // Execute
+            for(Task task : tasks) {
+                try{
+                    System.out.println("Running: " + task.getTaskName());
+                    DbConn myConnection = connections.get(task.getConnection());
+                    Method method = myConnection.getClass().getMethod(task.getTaskName(), Task.class);
+                    method.invoke(myConnection, task);
+                } catch(Exception e){
+                    System.out.println("Task failed " + task.getTaskName() + " failed, continuing");
+                }
+                
+            }
         } catch(Exception e){
             System.out.println(e);
         }

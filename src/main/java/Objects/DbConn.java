@@ -400,16 +400,16 @@ public class DbConn implements Cloneable{
      * @param fullFilePath
      * @throws Exception
      */
-    public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
+    public void QueryToCSV(Task task) throws Exception {
         // System.out.println(selectQuery);
 
         // System.out.println("Writing to file: " + fullFilePath);
         Statement stmt = this.conn.createStatement();
-        ResultSet rs = stmt.executeQuery(selectQuery);
+        ResultSet rs = stmt.executeQuery(task.getSql());
         // int numCols = rs.getMetaData().getColumnCount();
         // System.out.println(selectQuery);
 
-        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+        CSVWriter writer = new CSVWriter(new FileWriter(task.getWritePath()));
         Boolean includeHeaders = true;
 
         writer.writeAll(rs, includeHeaders);
