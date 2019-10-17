@@ -1,0 +1,21 @@
+sys-dev:
+  dbtype: "SYBASE"
+  host: "dbsybase"
+  port: "5000"
+  user: "sa"
+  password_envar: "SYBASEPASSWORD"
+  database_name: "master"
+sys-dev1:
+  dbtype: "SYBASE"
+  host: "dbsybase"
+  port: "5000"
+  user: "sa"
+  password_envar: "SYBASEPASSWORD"
+  database_name: "tempdb"
+sys-dev2:
+  dbtype: "SYBASE"
+  host: "dbsybase"
+  port: "5000"
+  user: "sa"
+  password_envar: "SYBASEPASSWORD"
+  database_name: "tempdb"
