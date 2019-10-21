@@ -18,7 +18,7 @@ name-of-conneciton:
 Setting put the tasks.yaml:
 ```yaml
 Name-Of-Function:
-    name-of-conneciton:
+    name-of-connection:
         qualifer: # Under this are the parameters for the function above
             - param1
               parm2

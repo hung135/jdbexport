@@ -115,7 +115,7 @@ RUN echo 'alias submitcoverity="curl --form token=6GQCVP3FzRjnpDIR8XGGFg \
   --form description="Description" \
   https://scan.coverity.com/builds?project=hung135%2Fdbdifftest"'>>~/.bashrc
 
-RUN echo 'alias sonar="mvn sonar:sonar \
-  -Dsonar.projectKey=com.hung135 \
-  -Dsonar.host.url=http://sonarqube:9000 \
-  -Dsonar.login=f91baa6ba91b88f93c8a493405c2b79d15cc8bde"'>>/.bashrc
+# RUN echo 'alias sonar="mvn sonar:sonar \
+#   -Dsonar.projectKey=com.hung135 \
+#   -Dsonar.host.url=http://sonarqube:9000 \
+#   -Dsonar.login=f91baa6ba91b88f93c8a493405c2b79d15cc8bde"'>>/.bashrc

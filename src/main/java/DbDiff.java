@@ -24,10 +24,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import Dto.DBConfigDto;
-import Objects.DbConn;
-import Objects.Task;
-import Utils.YamlParser;
+import dto.DBConfigDto;
+import objects.DbConn;
+import objects.Task;
+import utils.YamlParser;
 
 public class DbDiff {
 
