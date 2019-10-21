@@ -10,6 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import com.opencsv.CSVWriter;
 
@@ -353,7 +357,7 @@ public class DbConn implements Cloneable{
      * @return
      * @throws Exception
      */
-    public String getAValue(String selectQuery) throws Exception {
+    public String GetAValue(String selectQuery) throws Exception {
 
         String aValue = null;
         Statement stmt = this.conn.createStatement();
@@ -366,26 +370,17 @@ public class DbConn implements Cloneable{
         return aValue;
     }
 
-    public List<String[]> queryToList(String selectQuery) throws Exception {
+    public List<String[]> QueryToList(Task task) throws Exception {
         List<String[]> items = new ArrayList<>();
 
         Statement stmt = this.conn.createStatement();
-        this.rs = stmt.executeQuery(selectQuery);
+        this.rs = stmt.executeQuery(task.getSql());
         ResultSetMetaData metadata = this.rs.getMetaData();
         int columnCount = metadata.getColumnCount();
-        /*
-         * for (int i = 1; i <= columnCount; i++) {
-         * System.out.println(metadata.getTableName(i) + " senstive: " +
-         * metadata.isCaseSensitive(i) + " name: " + metadata.getCatalogName(i) +
-         * " type: " + metadata.getColumnTypeName(i) + " schema: " +
-         * metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i)); }
-         */
+    
         while (this.rs.next()) {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {
-                /** Adding header row */
-                // byte[] data = rs.getBytes(i);
-                // row[i - 1] = new String(data, StandardCharsets.UTF_8);
                 row[i - 1] = (this.rs.getString(i));
             }
             items.add(row);
@@ -422,9 +417,28 @@ public class DbConn implements Cloneable{
         stmt.close();
     }
 
-    public void quertyToCSVOutputBinary(String query, String fullFilePath) throws Exception {
+    public void UploadImage(Task task) throws Exception {
+        if(task.getFolder()) {
+            System.out.println(this.GetAValue(String.format("SELECT COUNT(*) FROM %s", task.getDatabase())));
+
+            List<File> filesInFolder = Files.walk(Paths.get(task.getFilePath()))
+                .filter(p -> p.toString().endsWith("png") || p.toString().endsWith("jpeg"))
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+
+            for(File f : filesInFolder){
+                int rowNum = Integer.parseInt(this.GetAValue(String.format("SELECT COUNT(*) FROM %s", task.getDatabase()))) + 1;
+                DataUtils.UploadImage(this.conn, task.getinsertStatement(), f.getAbsolutePath(), rowNum);
+            }
+        } else {
+            int rowNum = Integer.parseInt(this.GetAValue(String.format("SELECT COUNT(*) FROM %s", task.getDatabase()))) + 1;
+            DataUtils.UploadImage(this.conn, task.getinsertStatement(), task.getFilePath(), rowNum);
+        }
+    }
+
+    public void QuertyToCSVOutputBinary(Task task) throws Exception {
         Statement stmt = this.conn.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
+        ResultSet rs = stmt.executeQuery(task.getSql());
         ResultSetMetaData metadata = rs.getMetaData();
 
         int columnCount = metadata.getColumnCount();
@@ -435,7 +449,6 @@ public class DbConn implements Cloneable{
             String type = metadata.getColumnTypeName(i);
             String columnName = metadata.getColumnName(i);
             System.out.println(columnName + " -- " + type);
-            // For now; later create custom enum. "image" isn't supported by JAVA
             List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
 
             if (dataTypes.contains(type.toUpperCase())) {
@@ -448,18 +461,7 @@ public class DbConn implements Cloneable{
 
         List<String[]> data = new ArrayList<String[]>();
         allColumnNames = Arrays.copyOf(allColumnNames, allColumnNames.length + imageColIndex.size());
-        // get values up here
-        // Map<Integer, Map<Integer, String>> output = new HashMap<Integer, Map<Integer,
-        // String>>();
-        // String tblName = metadata.getTableName(1);
-        // for (Integer i : columnTypeIndex) {
-        // columnNames[i] = metadata.getColumnName(i) + "_output";
-        // output.put(columnCount + i, DataUtils.outputBinary(this.conn, fullFilePath,
-        // tblName,
-        // metadata.getColumnName(i), metadata.getColumnTypeName(i)));
-        // }
-
-        // declare it once no for each row
+       
         int ii = 0;
         while (rs.next()) {
             ii++;
@@ -470,18 +472,12 @@ public class DbConn implements Cloneable{
             }
             for (int imgIdx : imageColIndex) {
 
-                // InputStream in = ByteSource.wrap().openStream();
-
-                // int length = in.available();
-                // get bytes faster than getinputstream but need enough memory to hold entire
-                // blob
                 byte[] blobBytes = rs.getBytes(imgIdx);
-                // in.read(blobBytes);
 
                 String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 
                 // change name here
-                String dirPath = fullFilePath + "/image/" + md5Hex;
+                String dirPath = task.getWritePath() + "/image/" + md5Hex;
                 File blobFile = new File(dirPath);
                 if (!blobFile.getParentFile().exists()) {
                     blobFile.getParentFile().mkdirs();
@@ -490,33 +486,27 @@ public class DbConn implements Cloneable{
 
                 fos.write(blobBytes);
                 fos.close();
-                // System.out.println("Image: "+ii+" "+length+" "+md5Hex);
                 row[imgIdx - 1] = dirPath;
                 if (Math.floorMod(ii, 1000) == 0) {
                     System.out.println("Records Dumped: " + ii);
                 }
             }
             data.add(row);
-            rs.close();
-            stmt.close();
+            
         }
 
-        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath + "/index.csv"));
+        CSVWriter writer = new CSVWriter(new FileWriter(task.getWritePath() + "/index.csv"));
         Boolean includeHeaders = true;
         // this is the header
         data.add(0, allColumnNames);
         writer.writeAll(data, includeHeaders);
 
         writer.close();
-
-    }
-
-    public void print_test(String selectQuery) {
-        System.out.println(selectQuery);
+        rs.close();
+        stmt.close();
     }
 
     public void QueryToExcel(Task task) throws Exception {
-
         Statement stmt = this.conn.createStatement();
 
         /* Define the SQL query */
@@ -532,9 +522,6 @@ public class DbConn implements Cloneable{
         for (int i = 1; i <= columnCount; i++) {
 
             columnNames.add(metadata.getColumnName(i));
-
-            // System.out.println(" " + metadata.getColumnName(i));
-
         }
 
         /* Populate data into the Map */

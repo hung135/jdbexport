@@ -6,6 +6,10 @@ public class Task {
     private String connection;
     private String qualifier;
     private String taskName;
+    private String insertStatement;
+    private String database;
+    private String filePath;
+    private Boolean folder;
 
     public Task() {
     }
@@ -15,6 +19,48 @@ public class Task {
         this.sql = sql;
     }
 
+    public Task(String sql){
+        this.sql = sql;
+    }
+
+    public Task(String insertStatement, String database, String filePath, Boolean folder) {
+        this.database = database;
+        this.insertStatement = insertStatement;
+        this.filePath = filePath;
+        this.folder = folder;
+    }
+
+    public Boolean getFolder() {
+        return this.folder;
+    }
+
+    public void setFolder(boolean folder) {
+        this.folder = folder;
+    }
+
+    public String getDatabase() {
+        return this.database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
+    public String getinsertStatement() {
+        return this.insertStatement;
+    }
+
+    public void setinsertStatement(String insertStatement) {
+        this.insertStatement = insertStatement;
+    }
+
+    public String getFilePath() {
+        return this.filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     public String getWritePath() {
         return this.writePath;

@@ -36,11 +36,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
-import objects.DbConn;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
+import objects.DbConn;
 
 /**
  * Functions we need to write that process some data, put them here
@@ -274,7 +274,7 @@ public class DataUtils {
      * @throws SQLException
      * @throws IOException
      */
-    public static void UploadImage(Connection conn, String filep, int uniqueid) throws SQLException, IOException {
+    public static void UploadImage(Connection conn, String insert, String filep, int pid) throws SQLException, IOException {
         File file = new File(filep);
 
         String filename = file.getName();
@@ -285,9 +285,7 @@ public class DataUtils {
         filestream = new FileInputStream(file);
 
         Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        // String query = "UPDATE assignment SET instructions_file = ?,
-        // instructions_filename = ? WHERE a_key = " + uniqueid;
-        String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
+        String query = String.format(insert, Integer.toString(pid));
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setBinaryStream(1, filestream, length);
         // ps.setString(2, filename);

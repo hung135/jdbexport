@@ -5,10 +5,31 @@
 #         sql: select * from dbo.monBucketPool
 #       - writePath: /workspace/output2.csv
 #         sql: select * from dbo.monBucketPool
-QueryToExcel:
-  sys-dev:
-    create:
-      - writePath: /workspace/output1.csv
-        sql: select * from dbo.monBucketPool
-      - writePath: /workspace/output2.csv
-        sql: select * from dbo.monBucketPool
+# QueryToExcel:
+#   sys-dev:
+#     create:
+#       - writePath: /workspace/output1.csv
+#         sql: select * from dbo.monBucketPool
+#       - writePath: /workspace/output2.csv
+#         sql: select * from dbo.monBucketPool
+# QueryToList:
+#   sys-dev:
+#     create_db:
+#       - sql: CREATE TABLE blobtest(pid int not null, img image)
+# UploadImage:
+#   sys-dev:
+#     test_image:
+#       - insertStatement: INSERT INTO blobtest (pid, img) VALUES(%s,?)
+#         database: blobtest
+#         filePath: /workspace/samples/
+#         folder: True
+# QueryToCSV:
+#   sys-dev:
+#     create:
+#       - writePath: /workspace/output1.csv
+#         sql: select * from dbo.blobtest
+# QuertyToCSVOutputBinary:
+#   sys-dev:
+#     items:
+#       - writePath: /workspace/output/
+#         sql: SELECT * FROM blobtest

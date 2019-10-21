@@ -148,5 +148,8 @@ log4j.appender.R.layout.ConversionPattern=%p %t %c - %m%n
 
 Supports:
 - Exporting a query result to CSV (QueryToCSV)
-- Exporting a query r esult to Excel (QueryToExcel)
+- Exporting a query result to Excel (QueryToExcel)
+- For quick creations use (QueryToList)
+- Exporting binary MD5 hash to CSV (QuertyToCSVOutputBinary)
+- UploadImage both single and entire paths 
 - more coming!
