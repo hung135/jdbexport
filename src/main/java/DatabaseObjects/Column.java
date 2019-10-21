@@ -1,4 +1,4 @@
-package DatabaseObjects;
+package databaseobjects;
 
 public class Column {
     public String columnName;

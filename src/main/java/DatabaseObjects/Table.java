@@ -1,4 +1,4 @@
-package DatabaseObjects;
+package databaseobjects;
 
 import java.util.ArrayList;
 import java.util.List;

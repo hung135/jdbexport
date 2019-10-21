@@ -1,4 +1,4 @@
-package Objects;
+package objects;
 
 import java.beans.PropertyVetoException;
 import java.io.File;
@@ -32,11 +32,14 @@ import com.opencsv.CSVWriter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.log4j.Logger;
 
-import DatabaseObjects.Column;
-import DatabaseObjects.Table;
-import Dto.DBConfigDto;
-import Enums.DbType;
+import databaseobjects.Column;
+import databaseobjects.Table;
+import dto.DBConfigDto;
+import enums.DbType;
+import utils.DataUtils;
+import utils.JLogger;
 
 public class DbConn implements Cloneable{
     public Connection conn;
@@ -53,7 +56,7 @@ public class DbConn implements Cloneable{
     public String password;
     public String  host;
     public String port ;
-    //public Logger logger;
+    public Logger logger;
 
     public DbConn clone() throws CloneNotSupportedException {
         return (DbConn) super.clone();
@@ -77,7 +80,7 @@ public class DbConn implements Cloneable{
         return this.url;
     }
 
-    public DbConn(DBConfigDto dto) 
+    public DbConn(DBConfigDto dto, JLogger jlogger) 
         throws SQLException, PropertyVetoException, ClassNotFoundException
     {    
         this.dbType = dto.getDbtype();
@@ -87,7 +90,7 @@ public class DbConn implements Cloneable{
         this.host= dto.getHost();
         this.port = dto.getPort().toString();
         String url = MessageFormat.format(dbType.url(), host, port, databaseName);
-        // this.logger = jLogger.logger;
+        this.logger = jlogger.logger;
  
         this.url = url;
         Properties props = new Properties();
@@ -512,12 +515,12 @@ public class DbConn implements Cloneable{
         System.out.println(selectQuery);
     }
 
-    public void queryToExcel(String selectQuery, String sheetName, String fullFilePath) throws Exception {
+    public void QueryToExcel(Task task) throws Exception {
 
         Statement stmt = this.conn.createStatement();
 
         /* Define the SQL query */
-        ResultSet rs = stmt.executeQuery(selectQuery);
+        ResultSet rs = stmt.executeQuery(task.getSql());
         /* Create Map for Excel Data */
         Map<String, Object[]> excel_data = new HashMap<String, Object[]>(); // create a map and define data
         int row_counter = 0;
@@ -550,7 +553,7 @@ public class DbConn implements Cloneable{
         /* Close all DB related objects */
         rs.close();
         stmt.close();
-        //DataUtils.writeToExcel(columnNames, excel_data, sheetName, fullFilePath);
+        DataUtils.WriteToExcel(columnNames, excel_data, "Sheet1", task.getWritePath());
     }
 
     /**

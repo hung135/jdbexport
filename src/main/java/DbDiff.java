@@ -24,10 +24,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import Dto.DBConfigDto;
-import Objects.DbConn;
-import Objects.Task;
-import Utils.YamlParser;
+import dto.DBConfigDto;
+import objects.DbConn;
+import objects.Task;
+import utils.JLogger;
+import utils.YamlParser;
 
 public class DbDiff {
 
@@ -35,13 +36,17 @@ public class DbDiff {
         Options cliOptions = new Options();
         Option connections = new Option("y", "connections", true, "Path to connections file");
         Option tasks = new Option("t", "tasks", true, "Path to tasks file");
+        Option debugLevel = new Option("d", "debug", true, "Debug level use: [all, debug, default, warning]");
+
         connections.setRequired(true);
         tasks.setRequired(true);
+        debugLevel.setRequired(false);
 
         cliOptions.addOption(connections);
         cliOptions.addOption(tasks);
+        cliOptions.addOption(debugLevel);
 
-        if (args.length == 0) {
+        if (args.length <= 2) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("Database diff tool", cliOptions);
             System.exit(1);
@@ -53,7 +58,7 @@ public class DbDiff {
         return cmd;
     }
 
-    public static Map<String, DbConn> BuildConnections(Map<String, Object> cons) throws JsonParseException,
+    public static Map<String, DbConn> BuildConnections(Map<String, Object> cons, JLogger logger) throws JsonParseException,
             JsonMappingException, IOException, ClassNotFoundException, SQLException, PropertyVetoException {
         Map<String, DbConn> dbConfigs = new HashMap<String, DbConn>();
         JsonBuilder builder = new JsonBuilder();
@@ -62,14 +67,14 @@ public class DbDiff {
         for(String key : cons.keySet()){
             String jsonString = builder.toJsonString(cons.get(key));
             DBConfigDto dto = mapper.readValue(jsonString,  new TypeReference<DBConfigDto>(){});
-            DbConn connectionObject = new DbConn(dto);
+            DbConn connectionObject = new DbConn(dto, logger);
             
             dbConfigs.put(key, connectionObject);
         }
         return dbConfigs;
     }
 
-    public static List<Task> TestOutput(Map<String, Object> ob) 
+    public static List<Task> BuildTasks(Map<String, Object> ob) 
         throws JsonParseException, JsonMappingException, IOException {
    
         List<Task> tasks = new ArrayList<Task>();
@@ -97,16 +102,26 @@ public class DbDiff {
         return tasks;
     }
 
-    public static void main(String[] args) throws ParseException {
+    public static JLogger BuildLogger(String identifier) throws IOException {
+        try {
+            return new JLogger(identifier.toLowerCase());
+        } catch(Exception e){
+            System.out.println(String.format("Couldn't build logger with %s -- using default configuration", identifier.toLowerCase()));
+            return new JLogger("default");
+        }
+    }
+
+    public static void main(String[] args) throws ParseException, IOException {
         CommandLine results = ParseCLI(args);
+        JLogger logger = BuildLogger(results.hasOption("debug") ? results.getOptionValue("debug") : "default");
 
         try {
             YamlParser parse_me = new YamlParser();
             Map<String, Object> connectionsYAML = parse_me.ReadYAML(results.getOptionValue("connections"));
             Map<String, Object> tasksYAML= parse_me.ReadYAML(results.getOptionValue("tasks"));
 
-            Map<String, DbConn> connections = BuildConnections(connectionsYAML);
-            List<Task> tasks = TestOutput(tasksYAML);
+            Map<String, DbConn> connections = BuildConnections(connectionsYAML, logger);
+            List<Task> tasks = BuildTasks(tasksYAML);
 
             // Execute
             for(Task task : tasks) {

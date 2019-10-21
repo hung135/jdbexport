@@ -1,6 +1,6 @@
-package Dto;
+package dto;
 
-import Enums.DbType;
+import enums.DbType;
 
 public class DBConfigDto {
 

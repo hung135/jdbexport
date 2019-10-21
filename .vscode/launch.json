@@ -15,7 +15,7 @@
             "name": "Debug (Launch)-DbDiff",
             "request": "launch",
             "mainClass": "DbDiff",
-            "args": "-y /workspace/yamls/connections.yaml -t /workspace/yamls/tasks.yaml"
+            "args": "-d all -y /workspace/yamls/connections.yaml -t /workspace/yamls/tasks.yaml"
         }
     ]
 }

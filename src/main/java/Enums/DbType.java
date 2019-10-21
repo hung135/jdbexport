@@ -1,4 +1,4 @@
-package Enums;
+package enums;
 public enum DbType {
     // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
     ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
