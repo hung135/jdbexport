@@ -551,26 +551,23 @@ public class DbConn implements Cloneable{
      * @throws IOException
      * @throws SQLException
      */
-    public void loadCSV(String tableName, String filePath) throws IOException, SQLException {
+    public void LoadCSV(Task task) throws IOException, SQLException {
         List<String> tableColumns;
 
         PreparedStatement preparedStatement = null;
 
         List<String> question = new ArrayList<>();
-        tableColumns = this.getColumns(tableName);
+        tableColumns = this.getColumns(task.getTable());
         for (int i = 0; i < tableColumns.size(); i++) {
             question.add("?");
         }
         String columns = String.join(",", question);
-        String sql = "Insert into " + tableName + " values(" + columns + ")";
+        String sql = "Insert into " + task.getTable() + " values(" + columns + ")";
         System.out.println(sql);
 
         preparedStatement = this.conn.prepareStatement(sql);
 
-        // CSVFormat fmt =
-        // CSVFormat.DEFAULT.withDelimiter(',').withQuote('"').withRecordSeparator("\r\n");
-
-        Reader file = new FileReader(filePath);
+        Reader file = new FileReader(task.getFilePath());
 
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(file);
         for (CSVRecord record : records) {

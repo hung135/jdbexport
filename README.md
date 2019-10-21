@@ -152,4 +152,4 @@ Supports:
 - For quick creations use (QueryToList)
 - Exporting binary MD5 hash to CSV (QuertyToCSVOutputBinary)
 - UploadImage both single and entire paths 
-- more coming!
+- UploadCSV (takes into consideration the **first** column being an **int** will refactor soon)

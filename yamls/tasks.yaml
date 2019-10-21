@@ -33,3 +33,14 @@
 #     items:
 #       - writePath: /workspace/output/
 #         sql: SELECT * FROM blobtest
+# QueryToList:
+#   sys-dev:
+#     drop_db:
+#       - sql: DROP TABLE testRecords;
+#     create_db:
+#       - sql: CREATE TABLE testRecords(record_id int not null, email_id VARCHAR(500), prefix VARCHAR(500), name VARCHAR(500), city VARCHAR(500), state VARCHAR(500), country VARCHAR(500))
+LoadCSV:
+  sys-dev:
+    upload:
+      - filePath: /workspace/samples/50K_records.csv
+        table: testRecords
