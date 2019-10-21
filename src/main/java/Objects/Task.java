@@ -10,6 +10,7 @@ public class Task {
     private String database;
     private String filePath;
     private Boolean folder;
+    private String table;
 
     public Task() {
     }
@@ -19,15 +20,23 @@ public class Task {
         this.sql = sql;
     }
 
-    public Task(String sql){
-        this.sql = sql;
+    // public Task(String sql){
+    //     this.sql = sql;
+    // }
+
+    // public Task(String insertStatement, String database, String filePath, Boolean folder) {
+    //     this.database = database;
+    //     this.insertStatement = insertStatement;
+    //     this.filePath = filePath;
+    //     this.folder = folder;
+    // }
+
+    public String getTable(){
+        return this.table;
     }
 
-    public Task(String insertStatement, String database, String filePath, Boolean folder) {
-        this.database = database;
-        this.insertStatement = insertStatement;
-        this.filePath = filePath;
-        this.folder = folder;
+    public void setTable(String table){
+        this.table = table;
     }
 
     public Boolean getFolder() {
