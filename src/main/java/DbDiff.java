@@ -132,6 +132,7 @@ public class DbDiff {
                     method.invoke(myConnection, task);
                 } catch(Exception e){
                     System.out.println("Task failed " + task.getTaskName() + " failed, continuing");
+                    logger.logger.error(e);
                 }
                 
             }
