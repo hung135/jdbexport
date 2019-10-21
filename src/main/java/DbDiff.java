@@ -104,9 +104,9 @@ public class DbDiff {
 
     public static JLogger BuildLogger(String identifier) throws IOException {
         try {
-            return new JLogger(identifier);
+            return new JLogger(identifier.toLowerCase());
         } catch(Exception e){
-            System.out.println(String.format("Couldn't build logger with %s -- using default configuration", identifier));
+            System.out.println(String.format("Couldn't build logger with %s -- using default configuration", identifier.toLowerCase()));
             return new JLogger("default");
         }
     }
