@@ -2,11 +2,11 @@
 Java - JDBC RDBMS export Util
 
 ### Using the tool:
-Simply download the release and run the following: `java -jar {JARPATH} -y {connections.yaml} -t {tasks.yaml}`
+Simply download the release and run the following: `java -jar {JARPATH} -d {debug-level} -y {connections.yaml} -t {tasks.yaml}`
 
 Setting up the connections.yaml:
 ```yaml
-name-of-conneciton:
+name-of-connection:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"
@@ -33,6 +33,10 @@ QueryToCSV:
         sql: select * from dbo.monBucketPool
 ```
 
+Debug levels:
+
+
 Supports:
--  Exporting a query result to CSV (QueryToCSV)
+- Exporting a query result to CSV (QueryToCSV)
+- Exporting a query r esult to Excel (QueryToExcel)
 - more coming!
