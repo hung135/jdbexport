@@ -5,10 +5,10 @@
 #         sql: select * from dbo.monBucketPool
 #       - writePath: /workspace/output2.csv
 #         sql: select * from dbo.monBucketPool
-# QueryToExcel:
-#   sys-dev:
-#     create:
-#       - writePath: /workspace/output1.csv
-#         sql: select * from dbo.monBucketPool
-#       - writePath: /workspace/output2.csv
-#         sql: select * from dbo.monBucketPool
+QueryToExcel:
+  sys-dev:
+    create:
+      - writePath: /workspace/output1.csv
+        sql: select * from dbo.monBucketPool
+      - writePath: /workspace/output2.csv
+        sql: select * from dbo.monBucketPool
